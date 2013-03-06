@@ -95,7 +95,7 @@ omit-deps += $(crtstuff)
 $(crtstuff:%=$(objpfx)%.o): %.o: %.S $(objpfx)defs.h
 	$(compile.S) -g0 $(ASFLAGS-.os) -o $@
 
-CFLAGS-initfini.s = -g0 -fPIC -fno-inline-functions $(fno-unit-at-a-time)
+CFLAGS-initfini.s = -g0 -fPIC -fno-inline-functions -fno-inline $(fno-unit-at-a-time)
 
 vpath initfini.c $(sysdirs)
 
