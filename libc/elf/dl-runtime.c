@@ -157,7 +157,7 @@ _dl_fixup (
 }
 #endif
 
-#if !defined PROF && !defined ELF_MACHINE_NO_PLT && !__BOUNDED_POINTERS__
+#if !defined ELF_MACHINE_NO_PLT && !__BOUNDED_POINTERS__
 DL_FIXUP_VALUE_TYPE
 __attribute ((noinline)) ARCH_FIXUP_ATTRIBUTE
 _dl_profile_fixup (
@@ -422,7 +422,7 @@ _dl_profile_fixup (
   return value;
 }
 
-#endif /* PROF && ELF_MACHINE_NO_PLT */
+#endif /* ELF_MACHINE_NO_PLT */
 
 
 #include <stdio.h>
