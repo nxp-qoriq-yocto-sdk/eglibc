@@ -81,13 +81,15 @@ int
     }
 
   /* Initialize the __cache_line_size variable from the aux vector.
-     This is used by memset to optimize setting to zero. */
+     This is used by memset to optimize setting to zero.  We have to
+     detect 8xx processors, which have buggy dcbz implementations that
+     cannot report page faults correctly.  That requires reading SPR,
+     which is a privileged operation.*/
   for (ElfW (auxv_t) * av = auxvec; av->a_type != AT_NULL; ++av)
     switch (av->a_type)
       {
       case AT_DCACHEBSIZE:
-	__cache_line_size = av->a_un.a_val;
-	break;
+         break;
       }
 
   return generic_start_main (stinfo->main, argc, ubp_av, auxvec,

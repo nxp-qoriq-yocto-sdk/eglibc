@@ -28,11 +28,12 @@ int __cache_line_size attribute_hidden;
    verify that the static extern __cache_line_size is defined by checking
    for not NULL.  If it is defined then assign the cache block size
    value to __cache_line_size.  This is used by memset to
-   optimize setting to zero. */
+   optimize setting to zero.  We have to detect 8xx processors, which
+   have buggy dcbz implementations that cannot report page faults
+   correctly. */
 #define DL_PLATFORM_AUXV						      \
       case AT_DCACHEBSIZE:						      \
-	__cache_line_size = av->a_un.a_val;				      \
-	break;
+	   break;
 
 #ifndef __ASSUME_STD_AUXV
 
