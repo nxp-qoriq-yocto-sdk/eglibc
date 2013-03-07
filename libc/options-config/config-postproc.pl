@@ -8,7 +8,7 @@ die "$usage" unless @ARGV;
 die "Could not open $ARGV[0]" unless -T $ARGV[0];
 
 sub yank {
-    @option = grep($_ ne $_[0], @option);
+    @option = grep(!($_ =~ /$_[0]\s*=/), @option);
 }
 
 open(DEFAULTS, $defaults) || die "Could not open $defaults\n";
@@ -16,7 +16,7 @@ open(DEFAULTS, $defaults) || die "Could not open $defaults\n";
 # get the full list of available options using the default config file
 $i = 0;
 while (<DEFAULTS>) {
-    if (/^\s*OPTION_(\w+)\s*=/) {
+    if (/^\s*OPTION_(\w+\s*=.*$)/) {
 	$option[$i++] = $1;
     }
 }
@@ -35,8 +35,9 @@ while (<>) {
 	s/CONFIG_/OPTION_/g;
 	print;
     } elsif (/^\s*#\s+CONFIG_(\w+) is not set/) {
-	# this is a comment line, change CONFIG_ to OPTION_, remove this
-	# option from option list, and convert to explicit OPTION_FOO=n
+	# this is a comment line for an unset boolean option, change CONFIG_
+	# to OPTION_, remove this option from option list, and convert to
+	# explicit OPTION_FOO=n
 	$opt = $1;
 	yank($opt);
 	s/CONFIG_/OPTION_/g;
@@ -46,9 +47,12 @@ while (<>) {
     }
 }
 
-# any options left in @options, are options that were not mentioned in
+# any boolean options left in @options, are options that were not mentioned in
 # the config file, and implicitly that means the option must be set =n,
 # so do that here.
 foreach $opt (@option) {
-    print "OPTION_$opt=n\n";
+    if ($opt =~ /=\s*[yn]/) {
+	$opt =~ s/=\s*[yn]/=n/;
+	print "OPTION_$opt\n";
+    }
 }

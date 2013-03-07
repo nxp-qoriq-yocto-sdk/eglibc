@@ -46,9 +46,15 @@ END {
                 print "#define __" var " 1"
             else if (vars[var] == "n")
                 print "/* #undef __" var " */"
-            # Ignore variables that don't have boolean values.
-            # Ideally, this would be driven by the types given in
-            # option-groups.def.
+	    else if (vars[var] ~ /^[0-9]+/ ||
+		     vars[var] ~ /^0x[0-9aAbBcCdDeEfF]+/ ||
+		     vars[var] ~ /^\"/)
+		 print "#define __" var " " vars[var]
+	    else
+		print "/* #undef __" var " */"
+            # Ignore variables that don't have boolean, int, hex, or
+	    # string values. Ideally, this would be driven by the types
+	    # given in option-groups.def.
         }
     }
 

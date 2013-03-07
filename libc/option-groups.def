@@ -513,8 +513,11 @@ config EGLIBC_MEMUSAGE
        the `memusage' and `memusagestat' utilities.
        These components provide memory profiling functions.
 
-       EGLIBC_MEMUSAGE_DEFAULT_BUFFER_SIZE
-
+config EGLIBC_MEMUSAGE_DEFAULT_BUFFER_SIZE
+   int "Memory profiling library buffer size"
+   depends on EGLIBC_MEMUSAGE
+   default "32768"
+   help
        Libmemusage library buffers the profiling data in memory
        before writing it out to disk.  By default, the library
        allocates 1.5M buffer, which can be substantial for some
@@ -553,8 +556,11 @@ config EGLIBC_NSSWITCH
        'option-groups.config' file must set the following two
        variables:
 
-       EGLIBC_NSSWITCH_FIXED_CONFIG
-
+config EGLIBC_NSSWITCH_FIXED_CONFIG
+   string "Nsswitch fixed config filename"
+   depends on !EGLIBC_NSSWITCH
+   default ""
+   help
           Set this to the name of a file whose contents observe the
           same syntax as an ordinary '/etc/nsswitch.conf' file.  The
           EGLIBC build process parses this file just as EGLIBC would
@@ -576,8 +582,11 @@ config EGLIBC_NSSWITCH
           you will probably want to delete references to databases not
           needed on your system.
 
-       EGLIBC_NSSWITCH_FIXED_FUNCTIONS
-
+config EGLIBC_NSSWITCH_FIXED_FUNCTIONS
+   string "Nsswitch fixed functions filename"
+   depends on !EGLIBC_NSSWITCH
+   default ""
+   help
           The EGLIBC build process uses this file to decide which
           functions to make available from which service libraries.
           The file 'nss/fixed-nsswitch.functions' serves as a sample

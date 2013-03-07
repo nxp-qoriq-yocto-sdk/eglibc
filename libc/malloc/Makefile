@@ -48,10 +48,6 @@ non-lib.a := libmcheck.a
 ifeq ($(OPTION_EGLIBC_MEMUSAGE),y)
 extra-libs = libmemusage
 extra-libs-others = $(extra-libs)
-
-ifdef OPTION_EGLIBC_MEMUSAGE_DEFAULT_BUFFER_SIZE
-CPPFLAGS-memusage += -D__OPTION_EGLIBC_MEMUSAGE_DEFAULT_BUFFER_SIZE=$(OPTION_EGLIBC_MEMUSAGE_DEFAULT_BUFFER_SIZE)
-endif
 endif
 
 libmemusage-routines = memusage
