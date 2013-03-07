@@ -46,6 +46,8 @@ sysincludes = @SYSINCLUDES@
 c++-sysincludes = @CXX_SYSINCLUDES@
 all-warnings = @all_warnings@
 
+kconfig_tools = @KCONFIG_TOOLS@
+
 elf = @elf@
 have-z-combreloc = @libc_cv_z_combreloc@
 have-z-execstack = @libc_cv_z_execstack@

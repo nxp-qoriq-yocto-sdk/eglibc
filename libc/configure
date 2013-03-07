@@ -704,6 +704,7 @@ KSH
 libc_cv_have_bash2
 BASH_SHELL
 libc_cv_gcc_static_libgcc
+KCONFIG_TOOLS
 CXX_SYSINCLUDES
 SYSINCLUDES
 AUTOCONF
@@ -813,6 +814,7 @@ with_elf
 with_selinux
 with_xcoff
 with_headers
+with_kconfig
 with_default_link
 enable_sanity_checks
 enable_check_abi
@@ -1517,6 +1519,9 @@ Optional Packages:
   --with-xcoff            if using the XCOFF object format
   --with-headers=PATH     location of system headers to use (for example
                           /usr/src/linux/include) [default=compiler default]
+  --with-kconfig=PATH     location of kconfig tools to use (from Linux kernel
+                          builds) to re-use for configuring EGLIBC option
+                          groups
   --with-default-link     do not use explicit linker scripts
   --with-pkgversion=PKG   Use PKG in the version string in place of "EGLIBC"
   --with-bugurl=URL       Direct users to URL to report a bug
@@ -3605,6 +3610,14 @@ else
   sysheaders=''
 fi
 
+
+
+# Check whether --with-kconfig was given.
+if test "${with_kconfig+set}" = set; then
+  withval=$with_kconfig; KCONFIG_TOOLS=$withval
+else
+  KCONFIG_TOOLS=''
+fi
 
 
 

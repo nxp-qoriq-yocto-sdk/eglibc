@@ -243,9 +243,29 @@ full EGLIBC build:
     > $src/libc/configure \
     >     --prefix=/usr \
     >     --with-headers=$sysroot/usr/include \
+    >     --with-kconfig=$obj/linux/scripts/kconfig \
     >     --build=$build \
     >     --host=$target \
     >     --disable-profile --without-gd --without-cvs --enable-add-ons
+
+Note the additional '--with-kconfig' option. This tells EGLIBC where to
+find the host config tools used by the kernel 'make config' and 'make
+menuconfig'.  These tools can be re-used by EGLIBC for its own 'make
+*config' support, which will create 'option-groups.config' for you.
+But first make sure those tools have been built by running some
+dummy 'make *config' calls in the kernel directory:
+
+    $ cd $obj/linux
+    $ PATH=$tools/bin:$PATH make config \
+    >      ARCH=$linux_arch CROSS_COMPILE=$target- \
+    $ PATH=$tools/bin:$PATH make menuconfig \
+    >      ARCH=$linux_arch CROSS_COMPILE=$target- \
+
+Now we can configure and build the full EGLIBC:
+
+    $ cd $obj/eglibc
+    $ PATH=$tools/bin:$PATH make defconfig
+    $ PATH=$tools/bin:$PATH make menuconfig
     $ PATH=$tools/bin:$PATH make
     $ PATH=$tools/bin:$PATH make install install_root=$sysroot
 
