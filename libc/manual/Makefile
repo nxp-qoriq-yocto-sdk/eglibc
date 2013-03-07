@@ -109,7 +109,8 @@ libm-err.texi: stamp-libm-err
 stamp-libm-err: libm-err-tab.pl $(wildcard $(foreach dir,$(sysdirs),\
 						     $(dir)/libm-test-ulps))
 	pwd=`pwd`; \
-	$(PERL) $< $$pwd/.. > libm-err-tmp
+	$(PERL) $< $$pwd/../ports > libm-err-tmp
+	$(PERL) $< $$pwd/../sysdeps >> libm-err-tmp
 	$(move-if-change) libm-err-tmp libm-err.texi
 	touch $@
 
