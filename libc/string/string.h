@@ -45,6 +45,10 @@ __BEGIN_NAMESPACE_STD
 /* Copy N bytes of SRC to DEST.  */
 extern void *memcpy (void *__restrict __dest, const void *__restrict __src,
 		     size_t __n) __THROW __nonnull ((1, 2));
+#if defined (__powerpc__)
+extern void *largememcpy (void *__restrict __dest, const void *__restrict __src,
+		     size_t __n) __THROW __nonnull ((1, 2));
+#endif
 /* Copy N bytes of SRC to DEST, guaranteeing
    correct behavior for overlapping strings.  */
 extern void *memmove (void *__dest, const void *__src, size_t __n)

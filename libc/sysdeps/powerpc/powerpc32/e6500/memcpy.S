@@ -1,0 +1,222 @@
+/* Optimized memcpy implementation for e6500 32-bit PowerPC.
+   Copyright (C) 2003, 2006, 2011 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   The GNU C Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with the GNU C Library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+   02111-1307 USA.  */
+
+#include <sysdep.h>
+
+/* __ptr_t [r3] memcpy (__ptr_t dst [r3], __ptr_t src [r4], size_t len [r5]);
+   Returns 'dst'.
+
+	 r3 = destination
+	 r4 = source
+	 r5 = byte count
+	
+	 volatile fixed point registers usable:
+	 r0, r3-r12
+
+	 volatile floating point registers usable:
+	 f0-f13
+*/	 
+
+EALIGN (memcpy, 5, 0)
+	CALL_MCOUNT
+
+	cmplw cr0,r4,r3		/* if source==destination, return.*/
+	beqlr cr0
+
+	cmplwi r5,16		/* if number of bytes is less than 8 (optimal value TBD), but greater than zero. copy byte-by-byte */
+	mr r6, r3
+	blt Lcopy_remaining
+	
+	neg r0,r3		/* temp = r0 */
+	andi. r11,r0,15		/* count = r11 [temp & 3] */
+	beq L1
+
+	ld r0, 0(r4)
+	ld r8, 8(r4)
+	subf r5,r11,r5		/* n = n - count */
+	add r4,r4,r11
+
+	std r0, 0(r6)
+	std r8, 8(r6)
+	add r6,r6,r11
+
+L1:
+	cmplwi 7,r5,63
+	ble 7,Lcopy_remaining
+
+	srwi r11,r5,6		/* count = n / CACHE_LINE_SIZE */;
+	rlwinm r5,r5,0,26,31	/* rem = n % CACHE_LINE_SIZE; */
+	rlwinm. r0,r4,0,28,31
+	mtctr r11		/* move count */
+	li r7,16
+	li r8,32
+	li r9,48
+	bne 0, Lcopy_nalign
+
+L5:
+	lvx v14,0,r4
+	lvx v15,r7,r4
+	lvx v16,r8,r4
+	lvx v17,r9,r4
+	addi r4,r4,64
+	
+	stvx v14,0,r6
+	stvx v15,r7,r6
+	stvx v16,r8,r6
+	stvx v17,r9,r6
+	addi r6,r6,64
+	bdnz L5
+
+Lcopy_remaining:
+	srwi.  r11,r5,3		/* count = rem / sizeof(unsigned long); */
+	rlwinm r5,r5,0,29,31	/* n =   rem % sizeof(unsigned long); */
+	beq 0, Lcopy_bytes
+
+	mtcrf  0x01,r11
+	bf cr7*4+1,16f
+
+	ld r0, 0(r4)		/* copy 32 bytes */
+	ld r8, 8(r4)
+	std r0, 0(r6)
+	std r8, 8(r6)
+
+	ld r0,16(r4)
+	ld r8,24(r4)
+	std r0,16(r6)
+	std r8,24(r6)
+	
+	addi r4,r4,32
+	addi r6,r6,32
+
+16:
+	bf cr7*4+2,8f
+
+	ld r0, 0(r4)		/* copy 16 bytes */
+	ld r8, 8(r4)
+	std r0, 0(r6)	
+	std r8, 8(r6)
+	
+	addi r4,r4,16
+	addi r6,r6,16
+8:
+	bf cr7*4+3, Lcopy_bytes
+	ld r0, 0(r4)		/* copy 8 bytes */
+	std r0, 0(r6)
+	addi r4,r4,8
+	addi r6,r6,8
+
+Lcopy_bytes:
+	cmplwi cr1,r5,4
+	cmplwi cr0,r5,1
+	bgt cr1,1f		/* nb > 4?  (5, 6, 7 bytes) */
+	ble cr0,2f		/* nb <= 1? (0, 1 bytes) */
+
+	addi r0,r5,-2		/* 2, 3, 4 bytes */
+	lhz r9,0(r4)
+	lhzx r11,r4,r0
+	sth r9,0(r6)
+	sthx r11,r6,r0
+	blr
+
+1:
+	addi r0,r5,-4		/* 5, 6, 7 bytes */
+	lwz r9,0(r4)
+	lwzx r11,r4,r0
+	stw r9,0(r6)
+	stwx r11,r6,r0
+	blr
+
+2:
+	mtocrf 0x1,r5		/* nbytes == 0 ? return */
+	bflr 31
+	lbz r0,0(r4)		/* nbytes == 1 */
+	stb r0,0(r6)
+	blr
+
+Lcopy_nalign:
+#ifndef _SOFT_FLOAT
+	rlwinm. r0,r4,0,29,31
+	beq 0, Lcopy_nalign_ldst
+#endif
+
+Lcopy_nalign_altivec:
+	lvx v0,0,r4 		/* load MSQ */
+	lvsl v18,0,r4 		/* set permute control vector */
+	lvx v19,r7,r4 		/* load LSQ */
+	vperm v14,v0,v19,v18 	/* align the data */
+	
+	lvx v0,r7,r4 		/* load MSQ */
+	lvsl v18,r7,r4 		/* set permute control vector */
+	lvx v19,r8,r4 		/* load LSQ */
+	vperm v15,v0,v19,v18 	/* align the data */
+
+	lvx v0,r8,r4 		/* load MSQ */
+	lvsl v18,r8,r4 		/* set permute control vector */
+	lvx v19,r9,r4 		/* load LSQ */
+	vperm v16,v0,v19,v18 	/* align the data */
+
+	lvx v0,r9,r4 		/* load MSQ */
+	lvsl v18,r9,r4 		/* set permute control vector */
+	addi r4,r4,64
+	lvx v19,0,r4 		/* load LSQ */
+	vperm v17,v0,v19,v18 	/* align the data */
+
+	stvx v14,0,r6
+	stvx v15,r7,r6
+	stvx v16,r8,r6
+	stvx v17,r9,r6
+	addi r6,r6,64
+
+	bdnz Lcopy_nalign_altivec
+
+	b Lcopy_remaining
+
+#ifndef _SOFT_FLOAT
+Lcopy_nalign_ldst:
+	lfd  0, 0(r4)		/* copy 64 bytes */
+	lfd  1, 8(r4)
+	lfd  2,16(r4)
+	lfd  3,24(r4)
+	
+	stfd 0, 0(r6)
+	stfd 1, 8(r6)
+	stfd 2,16(r6)
+	stfd 3,24(r6)
+	
+	lfd  0,32(r4)
+	lfd  1,40(r4)
+	lfd  2,48(r4)
+	lfd  3,56(r4)
+	addi r4,r4,64
+
+	stfd 0,32(r6)
+	stfd 1,40(r6)
+	stfd 2,48(r6)
+	stfd 3,56(r6)
+	addi r6,r6,64
+
+	bdnz Lcopy_nalign_ldst
+
+	b Lcopy_remaining
+#endif
+
+END (memcpy)
+libc_hidden_builtin_def (memcpy)
+weak_alias (memcpy,largememcpy)
+libc_hidden_def (largememcpy)

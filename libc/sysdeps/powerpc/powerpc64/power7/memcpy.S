@@ -438,3 +438,5 @@ L(end_unaligned_loop):
 
 END_GEN_TB (memcpy,TB_TOCLESS)
 libc_hidden_builtin_def (memcpy)
+weak_alias (memcpy,largememcpy)
+libc_hidden_def (largememcpy)
