@@ -23,6 +23,10 @@ subdir	:= timezone
 extra-objs := scheck.o ialloc.o
 
 others	:= zdump zic
+ifneq (no,$(cross-compiling))
+others += cross-zic
+endif
+
 tests	:= test-tz tst-timezone
 
 # pacificnew doesn't compile; if it is to be used, it should be included in
@@ -51,10 +55,20 @@ endif
 
 include ../Rules
 
+zic-objs = zic.o ialloc.o scheck.o
+
+$(addprefix $(objpfx)cross-,$(zic-objs)): $(objpfx)cross-%.o: %.c
+	$(BUILD_CC) $< -c $(OUTPUT_OPTION) $(CFLAGS-$*.c) $(CPPFLAGS-$*) \
+		-DREPORT_BUGS_TO='"<http://www.eglibc.org/issues/>"' \
+		-DPKGVERSION='"(EGLIBC) "' \
+		 $(compile-mkdep-flags) -iquote $(objpfx)
+
+$(objpfx)cross-zic: $(addprefix $(objpfx)cross-,$(zic-objs))
+	$(BUILD_CC) $(addprefix $(objpfx)cross-,$(zic-objs)) -o $@
 
 $(objpfx)zic: $(objpfx)scheck.o $(objpfx)ialloc.o
-
 $(objpfx)zic.o $(objpfx)zdump.o: $(objpfx)version.h
+$(objpfx)cross-zic.o $(objpfx)cross-zdump.o: $(objpfx)version.h
 
 $(objpfx)version.h: $(common-objpfx)config.make
 	echo 'static char const TZVERSION[]="$(version)";' \
@@ -76,10 +90,17 @@ CFLAGS-scheck.c = -Wno-strict-prototypes -DNOID -DHAVE_GETTEXT
 # Don't add leapseconds here since test-tz made checks that work only without
 # leapseconds.
 testdata = $(objpfx)testdata
+ifeq (no,$(cross-compiling))
 define build-testdata
 GCONV_PATH=${common-objpfx}iconvdata LANGUAGE=C LC_ALL=C \
   $(built-program-cmd) -d $(testdata) -y ./yearistype $<
 endef
+else
+define build-testdata
+LANGUAGE=C LC_ALL=C \
+  $(objpfx)cross-zic -d $(testdata) -y ./yearistype $<
+endef
+endif
 
 $(objpfx)test-tz.out: $(addprefix $(testdata)/, America/New_York Etc/UTC UTC)
 $(objpfx)tst-timezone.out: $(addprefix $(testdata)/, \
@@ -92,7 +113,11 @@ test-tz-ENV = TZDIR=$(testdata)
 tst-timezone-ENV = TZDIR=$(testdata)
 
 # Note this must come second in the deps list for $(built-program-cmd) to work.
+ifeq (no,$(cross-compiling))
 zic-deps = $(objpfx)zic $(leapseconds) yearistype
+else
+zic-deps = $(objpfx)cross-zic $(objpfx)zic $(leapseconds) yearistype
+endif
 
 $(testdata)/America/New_York: northamerica $(zic-deps)
 	$(build-testdata)
