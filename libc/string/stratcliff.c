@@ -18,6 +18,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #define _GNU_SOURCE 1
+#define TIMEOUT 10
 
 /* Make sure we don't test the optimized inline functions if we want to
    test the real implementation.  */
