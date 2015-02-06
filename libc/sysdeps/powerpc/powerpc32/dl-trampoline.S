@@ -70,7 +70,6 @@ _dl_runtime_resolve:
 	cfi_endproc
 	.size	 _dl_runtime_resolve,.-_dl_runtime_resolve
 
-#ifndef PROF
 	.align 2
 	.globl _dl_prof_resolve
 	.type _dl_prof_resolve,@function
@@ -186,4 +185,4 @@ _dl_prof_resolve:
 	bctr
 	cfi_endproc
 	.size	 _dl_prof_resolve,.-_dl_prof_resolve
-#endif
+

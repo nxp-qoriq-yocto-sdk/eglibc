@@ -148,7 +148,6 @@ _dl_fixup (
   return elf_machine_fixup_plt (l, result, reloc, rel_addr, value);
 }
 
-#ifndef PROF
 DL_FIXUP_VALUE_TYPE
 __attribute ((noinline)) ARCH_FIXUP_ATTRIBUTE
 _dl_profile_fixup (
@@ -433,7 +432,6 @@ _dl_profile_fixup (
   return value;
 }
 
-#endif /* PROF */
 
 
 #include <stdio.h>
