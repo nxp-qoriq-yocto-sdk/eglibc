@@ -25,10 +25,12 @@
 #include <fenv_private.h>
 #include_next <math_private.h>
 
-# if __WORDSIZE == 64 || defined _ARCH_PWR4
-#  define __CPU_HAS_FSQRT 1
-# else
-#  define __CPU_HAS_FSQRT ((GLRO(dl_hwcap) & PPC_FEATURE_64) != 0)
+# ifndef __CPU_HAS_FSQRT
+#  if __WORDSIZE == 64 || defined _ARCH_PWR4
+#   define __CPU_HAS_FSQRT 1
+#  else
+#   define __CPU_HAS_FSQRT ((GLRO(dl_hwcap) & PPC_FEATURE_64) != 0)
+#  endif
 # endif
 
 extern double __slow_ieee754_sqrt (double);
