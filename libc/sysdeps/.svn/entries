@@ -1,0 +1,79 @@
+10
+
+dir
+25585
+svn://svn.eglibc.org/branches/eglibc-2_19/libc/sysdeps
+svn://svn.eglibc.org
+
+
+
+2014-02-07T21:04:10.355119Z
+25237
+joseph
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7b3dc134-2b1b-0410-93df-9e9f96275f8d
+
+powerpc
+dir
+
+unix
+dir
+
+x86
+dir
+
+pthread
+dir
+
+wordsize-32
+dir
+
+i386
+dir
+
+gnu
+dir
+
+wordsize-64
+dir
+
+s390
+dir
+
+x86_64
+dir
+
+init_array
+dir
+
+posix
+dir
+
+ieee754
+dir
+
+sparc
+dir
+
+mach
+dir
+
+sh
+dir
+
+generic
+dir
+

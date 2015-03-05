@@ -1,0 +1,61 @@
+10
+
+dir
+25585
+svn://svn.eglibc.org/branches/eglibc-2_19/libc/ports/sysdeps
+svn://svn.eglibc.org
+
+
+
+2014-02-07T21:04:10.355119Z
+25237
+joseph
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+7b3dc134-2b1b-0410-93df-9e9f96275f8d
+
+arm
+dir
+
+am33
+dir
+
+ia64
+dir
+
+unix
+dir
+
+alpha
+dir
+
+m68k
+dir
+
+microblaze
+dir
+
+aarch64
+dir
+
+hppa
+dir
+
+mips
+dir
+
+tile
+dir
+
