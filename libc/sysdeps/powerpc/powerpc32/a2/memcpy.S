@@ -525,5 +525,3 @@ L(endloop2_128):
 
 END (memcpy)
 libc_hidden_builtin_def (memcpy)
-weak_alias (memcpy, largememcpy)
-libc_hidden_def (largememcpy)
