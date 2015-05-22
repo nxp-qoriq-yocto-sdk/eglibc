@@ -70,6 +70,9 @@ extern __typeof (strncasecmp_l) __strncasecmp_l;
     }))
 #endif
 
+#if defined (__powerpc__)
+libc_hidden_proto (largememcpy)
+#endif
 libc_hidden_proto (__mempcpy)
 libc_hidden_proto (__stpcpy)
 libc_hidden_proto (__stpncpy)

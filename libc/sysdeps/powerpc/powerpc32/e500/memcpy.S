@@ -406,3 +406,8 @@ L(bkw_fix_loop):
 
 END (FUNCTION)
 libc_hidden_builtin_def (FUNCTION)
+
+#ifndef __MEMMOVE__
+weak_alias (memcpy,largememcpy)
+libc_hidden_def (largememcpy)
+#endif
